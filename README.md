@@ -1,13 +1,18 @@
 # Herdr Open Links
 
-Open URLs, files, and folders from your current [Herdr](https://herdr.dev) pane.
-No selecting text or copying—even for long sign-in URLs and wrapped paths.
+**Open URLs and local paths from your [Herdr](https://herdr.dev) pane—even when they wrap across lines.**
+
+Press your Herdr prefix, then **U**, and choose a link. Open web URLs, files,
+and folders without selecting or copying text.
+
+Handles long sign-in URLs, `file://` links, quoted filenames with spaces, and
+wrapped paths. **Shift+Enter** opens the containing folder in Finder.
 
 ![Illustrated Herdr window with two panes and the Open Links picker](assets/demo.gif)
 
 Illustrated preview with sample links. The plugin scans the focused pane.
 
-**Requires macOS, Herdr 0.7.5+, and Node.js 18+.** No runtime dependencies or build step.
+**Requires macOS, Herdr 0.7.5+, and Node.js 18+.** No additional packages or build step.
 
 ## Install
 
@@ -40,6 +45,29 @@ Supports HTTP/HTTPS, local `file://` URLs, existing paths, and terminal hyperlin
 - Shift+Enter opens the selected local path's containing folder in Finder.
 - Up/Down selects; Left/Right changes page.
 - Esc clears search or closes the picker.
+
+## Why choose Open Links?
+
+Open Links combines web links and existing local paths in one small picker,
+using your Mac's default apps. It scans the focused pane's last 500 logical
+lines and tries to recover paths and URLs split across lines.
+
+Terminal soft wraps are joined using Herdr's API. Recovery of actual inserted
+line breaks is best effort; ambiguous breaks cannot always be recovered.
+
+## Similar plugins
+
+| Plugin                                                   | Useful when you want…                                                        |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| **Open Links**                                           | URLs and local paths together, default macOS apps, and broken-line recovery  |
+| [Openr](https://github.com/wraithyy/herdr-openr)         | Claude transcript scanning, configurable editors, copying, and Finder reveal |
+| [Link Hints](https://github.com/reobin/herdr-link-hints) | URL hints, additional URL schemes, and a prebuilt binary                     |
+| [Termscope](https://github.com/iurysza/termscope)        | Multiple-pane scanning, file previews, and editor line navigation            |
+| [FZF URL Picker](https://github.com/x0d7x/herdr-fzf-url) | Multiple-pane URL scanning with fuzzy search and copying                     |
+
+See the [dated comparison](docs/COMPARISON.md) for sample extraction results,
+the exact revisions examined, and limitations. These tools overlap; choose
+the workflow that fits your setup.
 
 ## Local development
 
