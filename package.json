@@ -1,0 +1,21 @@
+{
+  "name": "herdr-open-links",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Open web links, file URLs, and wrapped paths from a Herdr pane",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test links.test.mjs launch.test.mjs setup.test.mjs picker.test.mjs",
+    "check": "node --check index.mjs && node --check picker.mjs && node --check links.mjs && node --check setup.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "demo": "node scripts/demo.mjs"
+  },
+  "devDependencies": {
+    "prettier": "3.9.9"
+  }
+}

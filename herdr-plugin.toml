@@ -1,0 +1,24 @@
+id = "hosikiti.open-links"
+name = "Open Links"
+version = "0.1.0"
+min_herdr_version = "0.7.5"
+description = "Open web links, file URLs, and wrapped paths from the current pane"
+platforms = ["macos"]
+
+[[actions]]
+id = "pick"
+title = "Open a link from this pane"
+command = ["/bin/sh", "launch.sh", "launch"]
+
+[[actions]]
+id = "setup-keys"
+title = "Set up the Open Links shortcut"
+command = ["/bin/sh", "launch.sh", "setup-keys"]
+
+[[panes]]
+id = "picker"
+title = "Open Links"
+placement = "popup"
+width = "85%"
+height = "70%"
+command = ["/bin/sh", "launch.sh", "pick"]
