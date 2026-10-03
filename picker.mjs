@@ -1,5 +1,6 @@
 // Keyboard-driven terminal UI. Extraction and Herdr calls live in other modules.
 import { execFileSync } from 'node:child_process';
+import { dirname } from 'node:path';
 import { emitKeypressEvents } from 'node:readline';
 import { stripVTControlCharacters } from 'node:util';
 
@@ -31,7 +32,7 @@ export function showPicker(items, initialError = '') {
     );
 
     // Reserve room for the title, controls, status, and destination preview.
-    pageSize = Math.max(1, Math.min(LETTERS.length, rows - 9));
+    pageSize = Math.max(1, Math.min(LETTERS.length, rows - 10));
     const pageCount = Math.max(1, Math.ceil(matches.length / pageSize));
     page = Math.min(page, pageCount - 1);
     shown = matches.slice(page * pageSize, (page + 1) * pageSize);
@@ -44,6 +45,7 @@ export function showPicker(items, initialError = '') {
       '\x1b[H\x1b[2J\x1b[1;35m Open Links\x1b[0m',
       '',
       clip(help, width),
+      clip(' Shift+Enter: open containing folder (local paths)', width),
       '',
     ];
 
@@ -82,20 +84,27 @@ export function showPicker(items, initialError = '') {
 
   function close() {
     process.stdin.setRawMode(false);
-    process.stdout.write('\x1b[?25h\x1b[?1049l');
+    process.stdout.write('\x1b[<u\x1b[?25h\x1b[?1049l');
     process.exit(0);
   }
 
-  function openTarget(index) {
+  function openTarget(index, containingFolder = false) {
     const item = shown[index];
 
     if (!item) {
       return;
     }
 
+    if (containingFolder && item.kind === 'web') {
+      error = 'Containing folders are available for local paths only.';
+      render();
+      return;
+    }
+
     try {
+      const destination = containingFolder ? dirname(item.value) : item.value;
       // Pass the target as an argument, never as a shell command.
-      execFileSync('/usr/bin/open', [item.value], {
+      execFileSync('/usr/bin/open', [destination], {
         timeout: 10000,
         stdio: 'pipe',
       });
@@ -123,6 +132,26 @@ export function showPicker(items, initialError = '') {
   }
 
   function onKeypress(text, key = {}) {
+    // Node's readline does not decode CSI-u keys. Decode the basic Kitty
+    // protocol ourselves so Shift+Enter stays distinct from plain Enter.
+    const encoded = /^\x1b\[(\d+)(?:;(\d+))?u$/.exec(key.sequence || '');
+    if (encoded) {
+      const code = Number(encoded[1]);
+      const modifiers = Number(encoded[2] || 1) - 1;
+      text = String.fromCodePoint(code);
+      key = {
+        name:
+          { 13: 'return', 27: 'escape', 127: 'backspace', 9: 'tab' }[code] ||
+          text.toLowerCase(),
+        shift: Boolean(modifiers & 1),
+        meta: Boolean(modifiers & 2),
+        ctrl: Boolean(modifiers & 4),
+      };
+    } else if (key.sequence === '\x1b[27;2;13~') {
+      // Some terminals use xterm's modifyOtherKeys encoding instead.
+      key = { name: 'return', shift: true };
+    }
+
     if (key.ctrl && key.name === 'c') {
       close();
       return;
@@ -142,7 +171,7 @@ export function showPicker(items, initialError = '') {
         // Finish typing before letter keys regain their open-target behavior.
         searching = false;
       } else {
-        openTarget(selected);
+        openTarget(selected, Boolean(key.shift));
         return;
       }
     } else if (searching) {
@@ -172,7 +201,9 @@ export function showPicker(items, initialError = '') {
   }
 
   // Use the alternate screen and restore it when the popup closes.
-  process.stdout.write('\x1b[?1049h\x1b[?25l');
+  // Request modifier-aware keys while this popup is active; close() restores
+  // the prior keyboard mode before leaving the alternate screen.
+  process.stdout.write('\x1b[?1049h\x1b[?25l\x1b[>1u');
   process.stdin.setRawMode(true);
   // A lone Escape otherwise waits Node's default 500 ms. Keep a short grace
   // period for arrow-key escape sequences arriving in separate input chunks.

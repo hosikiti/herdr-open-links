@@ -3,7 +3,9 @@
 Open URLs, files, and folders from your current [Herdr](https://herdr.dev) pane.
 No selecting text or copying—even for long sign-in URLs and wrapped paths.
 
-![Open Links picker searching a long URL with sample data](assets/demo.gif)
+![Illustrated Herdr window with two panes and the Open Links picker](assets/demo.gif)
+
+Illustrated preview with sample links. The plugin scans the focused pane.
 
 **Requires macOS, Herdr 0.7.5+, and Node.js 18+.** No runtime dependencies or build step.
 
@@ -35,6 +37,7 @@ Supports HTTP/HTTPS, local `file://` URLs, existing paths, and terminal hyperlin
 
 - `/` searches; Enter finishes searching.
 - A letter or Enter opens a target.
+- Shift+Enter opens the selected local path's containing folder in Finder.
 - Up/Down selects; Left/Right changes page.
 - Esc clears search or closes the picker.
 

@@ -15,20 +15,8 @@ const output = resolve(projectRoot, 'assets/demo.gif');
 const temporary = mkdtempSync(join(tmpdir(), 'herdr-links-demo-'));
 const font = process.env.DEMO_FONT || '/System/Library/Fonts/Menlo.ttc';
 const samples = [
-  { kind: 'web', value: 'https://example.com/docs/getting-started' },
-  {
-    kind: 'folder',
-    value: '/demo/project/desktop/release',
-    reconstructed: true,
-  },
-  { kind: 'file', value: '/demo/project/README.md' },
-  {
-    kind: 'web',
-    value:
-      'https://accounts.example.com/oauth2/auth?client_id=demo-client&redirect_uri=http%3A%2F%2Flocalhost%3A54321%2Fcallback&response_type=code&scope=' +
-      'demo.read%20'.repeat(70) +
-      '&state=sample-only',
-  },
+  { kind: 'web', value: 'https://example.com/docs' },
+  { kind: 'web', value: 'https://example.org/releases' },
 ];
 
 function capturePicker() {
@@ -47,7 +35,7 @@ function capturePicker() {
 
   // Drive the real key handler without a terminal or OS/browser side effects.
   Object.defineProperty(process.stdout, 'columns', {
-    value: 95,
+    value: 72,
     configurable: true,
   });
   Object.defineProperty(process.stdout, 'rows', {
@@ -77,28 +65,23 @@ function capturePicker() {
     process.stdin.emit('keypress', text, { name });
 
   try {
+    snapshots.push({
+      text: '',
+      caption: 'One workspace · two panes · one link in each pane',
+      duration: 2.5,
+    });
+    snapshots.push({ text: '', caption: 'Press Cmd+P, then U', duration: 1.5 });
     showPicker(samples);
-    snapshot('Prefix → U: find links from the current pane', 2.4);
+    snapshot('Open Links', 3);
     key('', 'down');
-    snapshot('Folders and files are included too', 1.7);
-    key('/');
-    snapshot('Press / to search', 0.8);
-
-    for (const letter of 'oauth') {
-      key(letter);
-      snapshot(`Search: ${'oauth'.slice(0, 'oauth'.indexOf(letter) + 1)}`, 0.3);
-    }
-
-    key('\r', 'return');
-    snapshot('The full long URL is retained · press a to open', 2.4);
-    key('a');
-
-    if (opened !== samples[3].value)
+    snapshot('Choose a link with its letter: a or s', 2);
+    key('s');
+    if (opened !== samples[1].value)
       throw new Error('Demo selected the wrong target');
     snapshots.push({
-      text: '\x1b[1;35m Open Links\x1b[0m\r\n\r\n Selected URL sent to the browser opener.\r\n\r\n No selecting text. No copying.\r\n\r\n Press prefix → U, then a letter.',
-      caption: 'a: open the selected URL · browser opening simulated',
-      duration: 2.4,
+      text: '',
+      caption: 's → open example.org/releases · browser opening simulated',
+      duration: 2,
     });
   } finally {
     process.stdout.write = originalWrite;
@@ -135,60 +118,101 @@ try {
   frames.forEach((frame, index) => {
     const filters = [
       'drawbox=x=18:y=18:w=1064:h=604:color=0x353247:t=2',
-      'drawbox=x=20:y=20:w=1060:h=45:color=0x29263c:t=fill',
+      'drawbox=x=20:y=20:w=1060:h=35:color=0x29263c:t=fill',
+      'drawbox=x=20:y=55:w=180:h=510:color=0x242036:t=fill',
+      'drawbox=x=200:y=55:w=880:h=32:color=0x29263c:t=fill',
+      'drawbox=x=200:y=87:w=440:h=478:color=0x30263e:t=2',
+      'drawbox=x=640:y=87:w=440:h=478:color=0x353247:t=2',
       textFilter(
-        'HERDR OPEN LINKS',
+        '●  ●  ●                  Herdr',
         '0xd6cdec',
-        18,
-        42,
-        33,
-        `${index}-title.txt`,
+        14,
+        34,
+        30,
+        index + '-title.txt',
       ),
       textFilter(
-        'DEMO · SAMPLE DATA',
+        'spaces\n\n● Open Links\n  main',
+        '0xb79af8',
+        16,
+        35,
+        78,
+        index + '-spaces.txt',
+      ),
+      textFilter(
+        '1  main       +',
+        '0xb79af8',
+        16,
+        214,
+        65,
+        index + '-tab.txt',
+      ),
+      textFilter('docs', '0x827a96', 14, 220, 105, index + '-left-title.txt'),
+      textFilter(
+        'releases',
         '0x827a96',
-        13,
-        880,
-        36,
-        `${index}-sample.txt`,
+        14,
+        660,
+        105,
+        index + '-right-title.txt',
+      ),
+      textFilter(
+        '$ echo https://example.com/docs\n\nhttps://example.com/docs\n\n$ ▏',
+        '0xd6cdec',
+        15,
+        220,
+        151,
+        index + '-left.txt',
+      ),
+      textFilter(
+        '$ echo https://example.org/releases\n\nhttps://example.org/releases\n\n$ ▏',
+        '0xd6cdec',
+        15,
+        660,
+        151,
+        index + '-right.txt',
       ),
     ];
 
-    frame.text.split(/\r?\n/).forEach((line, row) => {
-      const color = line.includes('[36m')
-        ? '0x71d4d0'
-        : line.includes('[1;35m')
-          ? '0xb79af8'
-          : '0xd6cdec';
-      filters.push(
-        textFilter(
-          line,
-          color,
-          18,
-          42,
-          95 + row * 25,
-          `${index}-row-${row}.txt`,
-        ),
-      );
-    });
+    if (frame.text) {
+      filters.push('drawbox=x=270:y=185:w=735:h=330:color=0x1c1b2b:t=fill');
+      filters.push('drawbox=x=270:y=185:w=735:h=330:color=0xb79af8:t=2');
+      frame.text.split(/\r?\n/).forEach((line, row) => {
+        const color = line.includes('[36m')
+          ? '0x71d4d0'
+          : line.includes('[1;35m')
+            ? '0xb79af8'
+            : '0xd6cdec';
+        filters.push(
+          textFilter(
+            line,
+            color,
+            15,
+            286,
+            203 + row * 24,
+            index + '-row-' + row + '.txt',
+          ),
+        );
+      });
+    }
     filters.push(
       textFilter(
         frame.caption,
         '0xb79af8',
-        16,
-        42,
-        554,
-        `${index}-caption.txt`,
+        15,
+        35,
+        579,
+        index + '-caption.txt',
       ),
     );
     filters.push(
       textFilter(
-        'https://github.com/hosikiti/herdr-open-links',
+        'ILLUSTRATED HERDR WINDOW · REAL PICKER · SAMPLE DATA',
         '0x827a96',
-        13,
-        42,
-        587,
-        `${index}-repo.txt`,
+        11,
+        35,
+        607,
+        index + '-sample.txt',
       ),
     );
 

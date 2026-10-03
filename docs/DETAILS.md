@@ -63,6 +63,12 @@ reported working directory. Files must exist on this Mac; remote files are not
 fetched. A `:line[:column]` suffix is removed when it refers to an existing file;
 opening at a specific editor line is not currently supported.
 
+Enter opens the selected target directly. Shift+Enter opens the parent folder
+of a local file or folder; web links have no containing folder. The picker
+requests modifier-aware input using the [Kitty keyboard protocol](https://sw.kovidgoyal.net/kitty/keyboard-protocol/)
+and restores the previous mode when it closes. This requires Herdr and the
+outer terminal to preserve Shift+Enter as a distinct key.
+
 Herdr's `recent-unwrapped` API joins terminal soft wraps. When an application
 inserts actual line breaks, the plugin tries up to four continuation lines for
 existing local paths. Long web URLs with path/query-shaped continuations are
