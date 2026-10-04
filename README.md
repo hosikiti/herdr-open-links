@@ -8,7 +8,7 @@ and folders without selecting or copying text.
 Handles long sign-in URLs, `file://` links, quoted filenames with spaces, and
 wrapped paths. **Shift+Enter** opens the containing folder in Finder.
 
-![Illustrated Herdr window with two panes and the Open Links picker](assets/demo.gif)
+![Illustrated Herdr window with two panes and the Open Links picker](assets/demo.gif?v=2)
 
 Illustrated preview with sample links. The plugin scans the focused pane.
 
