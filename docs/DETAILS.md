@@ -54,10 +54,10 @@ precedence. The launcher reports an error if Node cannot be found.
 - HTTP and HTTPS URLs, including long OAuth URLs, queries, and fragments
 - Local `file://` URLs, including percent-encoded spaces
 - Existing absolute paths, `~/` paths, and relative paths
-- Quoted paths containing spaces
+- Quoted paths containing spaces, and unquoted local paths containing spaces when the complete path exists
 - OSC 8 terminal hyperlinks with destinations hidden behind short labels
 
-The picker reads the source pane's last 500 logical lines, deduplicates targets,
+The picker reads the source pane's last 100 logical lines, deduplicates targets,
 and places recent text matches first. Relative paths resolve against the pane's
 reported working directory. Files must exist on this Mac; remote files are not
 fetched. A `:line[:column]` suffix is removed when it refers to an existing file;

@@ -5,7 +5,7 @@
 Press your Herdr prefix, then **U**, and choose a link. Open web URLs, files,
 and folders without selecting or copying text.
 
-Handles long sign-in URLs, `file://` links, quoted filenames with spaces, and
+Handles long sign-in URLs, `file://` links, local paths with spaces, and
 wrapped paths. **Shift+Enter** opens the containing folder in Finder.
 
 ![Illustrated Herdr window with two panes and the Open Links picker](assets/demo.gif?v=2)
@@ -49,7 +49,7 @@ Supports HTTP/HTTPS, local `file://` URLs, existing paths, and terminal hyperlin
 ## Why choose Open Links?
 
 Open Links combines web links and existing local paths in one small picker,
-using your Mac's default apps. It scans the focused pane's last 500 logical
+using your Mac's default apps. It scans the focused pane's last 100 logical
 lines and tries to recover paths and URLs split across lines.
 
 Terminal soft wraps are joined using Herdr's API. Recovery of actual inserted
