@@ -123,6 +123,35 @@ function recoverContinuation(value, row, lines, cwd) {
   return recovered;
 }
 
+// Spaces can belong to a local path. Try complete word boundaries, longest
+// first, so trailing prose is excluded and an existing shorter prefix loses.
+function recoverSpacedPath(line, match, cwd) {
+  if (/^(?:https?|file):\/\//i.test(match[0])) {
+    return null;
+  }
+
+  const start = match.index;
+  const end = start + match[0].length;
+  if (!/^ +\S/.test(line.slice(end))) {
+    return null;
+  }
+
+  const tail = line.slice(start).split(/[\t<>"'`]/, 1)[0];
+  const boundaries = [...tail.matchAll(/ +|$/g)]
+    .map((boundary) => boundary.index)
+    .filter((boundary) => boundary > match[0].length);
+
+  for (const boundary of boundaries.reverse()) {
+    const value = tail.slice(0, boundary);
+    const candidate = target(value, cwd);
+    if (candidate && candidate.kind !== 'web') {
+      return { value, end: start + boundary };
+    }
+  }
+
+  return null;
+}
+
 /** Read plain text and OSC 8 destinations, newest matches first, without duplicates. */
 export function extract(text, cwd, ansi = '') {
   const found = [];
@@ -150,7 +179,17 @@ export function extract(text, cwd, ansi = '') {
       add(match[1], row);
     }
 
+    let consumedUntil = 0;
     for (const match of line.matchAll(TARGET_TOKEN)) {
+      if (match.index < consumedUntil) {
+        continue;
+      }
+      const spaced = recoverSpacedPath(line, match, cwd);
+      if (spaced) {
+        add(spaced.value, row);
+        consumedUntil = spaced.end;
+        continue;
+      }
       const value = match[0];
       const endsAtLineBoundary =
         line.slice(match.index + value.length).trim() === '';

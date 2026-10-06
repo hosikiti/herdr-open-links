@@ -30,6 +30,23 @@ test('reassembles the screenshot-style path split inside a word', () => {
 test('quoted paths with spaces and relative filenames', () => {
   assert.ok(values('"hello world.txt"').includes(file));
 });
+test('unquoted paths with spaces exclude trailing prose and keep adjacent links', () => {
+  assert.deepEqual(values(`Open ${file} then https://example.com/docs`), [
+    file,
+    'https://example.com/docs',
+  ]);
+  assert.deepEqual(values('./hello world.txt (open this file).'), [file]);
+});
+test('spaces in folders and app names prefer the full existing path', () => {
+  const prefix = join(dir, 'Musiversal');
+  const app = join(dir, 'Musiversal Artist.app');
+  const dmg = join(app, 'Musiversal Artist-0.0.8-universal.dmg');
+  mkdirSync(prefix);
+  mkdirSync(app);
+  writeFileSync(dmg, 'test');
+  assert.deepEqual(values(`⏺ ${app}`), [app]);
+  assert.deepEqual(values(`${dmg} (download).`), [dmg]);
+});
 test('web continuation and adjacent distinct URLs', () => {
   const prefix = 'https://example.com/' + 'a'.repeat(65);
   assert.equal(values(prefix + '\n  /more?x=1')[0], prefix + '/more?x=1');

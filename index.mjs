@@ -4,7 +4,7 @@ import { extract } from './links.mjs';
 import { showPicker } from './picker.mjs';
 
 const PLUGIN_ID = 'hosikiti.open-links';
-const SNAPSHOT_LINES = 500;
+const SNAPSHOT_LINES = 100;
 const herdr = process.env.HERDR_BIN_PATH || 'herdr';
 
 if (Number(process.versions.node.split('.')[0]) < 18) {
