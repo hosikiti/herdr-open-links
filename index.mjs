@@ -4,7 +4,6 @@ import { extract } from './links.mjs';
 import { showPicker } from './picker.mjs';
 
 const PLUGIN_ID = 'hosikiti.open-links';
-const SNAPSHOT_LINES = 100;
 const herdr = process.env.HERDR_BIN_PATH || 'herdr';
 
 if (Number(process.versions.node.split('.')[0]) < 18) {
@@ -77,14 +76,14 @@ function scanSourcePane() {
     throw new Error('Cannot determine the source folder.');
   }
 
-  const readArgs = ['pane', 'read', paneId, '--lines', String(SNAPSHOT_LINES)];
-  const text = runHerdr([...readArgs, '--source', 'recent-unwrapped']);
+  const readArgs = ['pane', 'read', paneId, '--source', 'visible'];
+  const text = runHerdr(readArgs);
   let ansi = '';
 
-  // Plain text recovers wrapped paths. ANSI supplies hidden OSC 8 destinations.
-  // If the optional ANSI read fails, plain links should remain usable.
+  // The visible source is passive: it avoids scrolling agent panes to read history.
+  // ANSI supplies hidden OSC 8 destinations; if unavailable, plain text still works.
   try {
-    ansi = runHerdr([...readArgs, '--source', 'recent', '--ansi']);
+    ansi = runHerdr([...readArgs, '--ansi']);
   } catch {
     // Older or unavailable ANSI snapshots can safely be skipped.
   }
