@@ -95,15 +95,25 @@ function recoverContinuation(value, row, lines, cwd) {
     const nextLine = lines[row + offset].trim();
 
     // Stop at prose, pane borders, blank lines, or a distinct new URL/path.
-    if (!nextLine || /\s|^[#*>│]|^(?:https?|file):\/\/|^~\//.test(nextLine)) {
+    if (!nextLine || /^[#*>│]|^(?:https?|file):\/\/|^~\//.test(nextLine)) {
       break;
+    }
+
+    const joins = [joined + nextLine, `${joined} ${nextLine}`];
+    const pathJoin = joins.find((candidate) => {
+      const resolved = target(candidate, cwd);
+      return resolved && resolved.kind !== 'web';
+    });
+
+    if (pathJoin) {
+      recovered = pathJoin;
     }
 
     joined += nextLine;
     const candidate = target(joined, cwd);
 
     // An existing file is stronger evidence than a string that looks like a URL.
-    if (candidate && candidate.kind !== 'web') {
+    if (!pathJoin && candidate && candidate.kind !== 'web') {
       recovered = joined;
     }
 
