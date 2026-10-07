@@ -49,11 +49,12 @@ Supports HTTP/HTTPS, local `file://` URLs, existing paths, and terminal hyperlin
 ## Why choose Open Links?
 
 Open Links combines web links and existing local paths in one small picker,
-using your Mac's default apps. It scans the focused pane's last 100 logical
-lines and tries to recover paths and URLs split across lines.
+using your Mac's default apps. It scans only the focused pane's visible screen,
+without scrolling through its history, and tries to recover paths and URLs
+split across lines.
 
-Terminal soft wraps are joined using Herdr's API. Recovery of actual inserted
-line breaks is best effort; ambiguous breaks cannot always be recovered.
+Wrapped text on the visible screen is reconstructed where possible. Ambiguous
+line breaks cannot always be recovered.
 
 ## Similar plugins
 

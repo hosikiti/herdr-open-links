@@ -1,8 +1,8 @@
 id = "hosikiti.open-links"
 name = "Open Links"
-version = "0.1.1"
+version = "0.1.2"
 min_herdr_version = "0.7.5"
-description = "Open web links, file URLs, and wrapped paths from the current pane"
+description = "Open web links, file URLs, and wrapped paths from the visible pane"
 platforms = ["macos"]
 
 [[actions]]
