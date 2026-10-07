@@ -57,11 +57,12 @@ precedence. The launcher reports an error if Node cannot be found.
 - Quoted paths containing spaces, and unquoted local paths containing spaces when the complete path exists
 - OSC 8 terminal hyperlinks with destinations hidden behind short labels
 
-The picker reads the source pane's last 100 logical lines, deduplicates targets,
-and places recent text matches first. Relative paths resolve against the pane's
-reported working directory. Files must exist on this Mac; remote files are not
-fetched. A `:line[:column]` suffix is removed when it refers to an existing file;
-opening at a specific editor line is not currently supported.
+The picker reads only the source pane's visible screen without scrolling its
+history, deduplicates targets, and places recent text matches first. Relative
+paths resolve against the pane's reported working directory. Files must exist
+on this Mac; remote files are not fetched. A `:line[:column]` suffix is removed
+when it refers to an existing file; opening at a specific editor line is not
+currently supported.
 
 Enter opens the selected target directly. Shift+Enter opens the parent folder
 of a local file or folder; web links have no containing folder. The picker
@@ -69,11 +70,10 @@ requests modifier-aware input using the [Kitty keyboard protocol](https://sw.kov
 and restores the previous mode when it closes. This requires Herdr and the
 outer terminal to preserve Shift+Enter as a distinct key.
 
-Herdr's `recent-unwrapped` API joins terminal soft wraps. When an application
-inserts actual line breaks, the plugin tries up to four continuation lines for
-existing local paths. Long web URLs with path/query-shaped continuations are
-also reconstructed and marked `↪`. Ambiguous hard breaks cannot always be
-recovered. A two-row preview of the selected destination appears below the list.
+The plugin tries up to four continuation lines for existing local paths and
+long web URLs with path/query-shaped continuations; reconstructed targets are
+marked `↪`. Ambiguous line breaks cannot always be recovered. A two-row preview
+of the selected destination appears below the list.
 
 Extraction happens locally. The plugin does not fetch URLs, use the clipboard,
 or save scanned pane contents. Choosing a web target opens it in your browser.
