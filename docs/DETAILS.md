@@ -71,7 +71,7 @@ and restores the previous mode when it closes. This requires Herdr and the
 outer terminal to preserve Shift+Enter as a distinct key.
 
 The plugin tries up to four continuation lines for existing local paths and
-long web URLs with path/query-shaped continuations; reconstructed targets are
+web URLs cut at the pane edge with path/query-shaped continuations; reconstructed targets are
 marked `↪`. Ambiguous line breaks cannot always be recovered. A two-row preview
 of the selected destination appears below the list.
 

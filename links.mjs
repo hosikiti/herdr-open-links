@@ -83,8 +83,10 @@ export function target(value, cwd) {
   return null;
 }
 
-function recoverContinuation(value, row, lines, cwd) {
+function recoverContinuation(value, row, lines, cwd, wrapped) {
   let joined = value;
+  let webJoined = value;
+  let webOpen = true;
   let recovered = null;
 
   for (
@@ -99,7 +101,9 @@ function recoverContinuation(value, row, lines, cwd) {
       break;
     }
 
-    const joins = [joined + nextLine, `${joined} ${nextLine}`];
+    // A wrapped URL ends at the first space; later words on that row are prose.
+    const token = nextLine.split(/\s/, 1)[0];
+    const joins = [joined + nextLine, `${joined} ${nextLine}`, joined + token];
     const pathJoin = joins.find((candidate) => {
       const resolved = target(candidate, cwd);
       return resolved && resolved.kind !== 'web';
@@ -112,6 +116,13 @@ function recoverContinuation(value, row, lines, cwd) {
     joined += nextLine;
     const candidate = target(joined, cwd);
 
+    let webCandidate = null;
+    if (webOpen) {
+      webJoined += token;
+      webCandidate = target(webJoined, cwd);
+      webOpen = token === nextLine;
+    }
+
     // An existing file is stronger evidence than a string that looks like a URL.
     if (!pathJoin && candidate && candidate.kind !== 'web') {
       recovered = joined;
@@ -120,13 +131,13 @@ function recoverContinuation(value, row, lines, cwd) {
     // Real newlines lose wrap metadata. Only join long URLs when the next row
     // looks like a path/query continuation; arbitrary words would be ambiguous.
     const looksLikeWebContinuation =
-      candidate?.kind === 'web' &&
-      value.length >= MIN_WRAPPED_URL_LENGTH &&
-      /[/?&=%#]/.test(nextLine) &&
+      webCandidate?.kind === 'web' &&
+      (value.length >= MIN_WRAPPED_URL_LENGTH || wrapped) &&
+      /[/?&=%#]/.test(token) &&
       !/[.,;)]$/.test(value);
 
     if (looksLikeWebContinuation) {
-      recovered = joined;
+      recovered = webJoined;
     }
   }
 
@@ -183,6 +194,9 @@ export function extract(text, cwd, ansi = '') {
   }
 
   const lines = stripVTControlCharacters(text).split(/\r?\n/);
+  // Terminal wrapping fills the row, so a URL on a row as long as the longest
+  // one (even a short URL after prose) was probably cut by the pane width.
+  const maxWidth = Math.max(...lines.map((line) => line.trimEnd().length));
 
   lines.forEach((line, row) => {
     for (const match of line.matchAll(/[`"']([^`"']+)[`"']/g)) {
@@ -204,7 +218,13 @@ export function extract(text, cwd, ansi = '') {
       const endsAtLineBoundary =
         line.slice(match.index + value.length).trim() === '';
       const recovered = endsAtLineBoundary
-        ? recoverContinuation(value, row, lines, cwd)
+        ? recoverContinuation(
+            value,
+            row,
+            lines,
+            cwd,
+            line.trimEnd().length >= maxWidth - 1,
+          )
         : null;
 
       if (recovered) {

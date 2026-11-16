@@ -101,3 +101,24 @@ test('preserves a very long synthetic OAuth URL byte for byte', () => {
     url,
   );
 });
+
+test('joins a short wrapped URL after prose and ignores prose after the join', () => {
+  const text = [
+    '● PR is open: https://github.com/musiversal/backe',
+    'nd-revamp/pull/2475 (base epic/tech_issues).',
+    '',
+    'The body is a placeholder.',
+  ].join('\n');
+  assert.deepEqual(values(text), [
+    'https://github.com/musiversal/backend-revamp/pull/2475',
+  ]);
+});
+
+test('joins a wrapped path when prose follows it on the next row', () => {
+  const split = folder.lastIndexOf('/desktop/') + 9;
+  const text = [
+    `3. Review the release folder (${folder.slice(0, split)}`,
+    `   ${folder.slice(split)}). Confirm the files match.`,
+  ].join('\n');
+  assert.deepEqual(values(text), [folder]);
+});
